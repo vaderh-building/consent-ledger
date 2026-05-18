@@ -19,6 +19,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    Text,
     UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -103,3 +104,59 @@ class ConsentPolicyEntry(Base):
     max_weight: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     policy: Mapped[ConsentPolicy] = relationship(back_populates="entries")
+
+
+class ProvenanceEntry(Base):
+    """One immutable row in the signed hash-chained log.
+
+    `canonical_body` is the exact JSON string fed into the hash; we persist it
+    verbatim so a verifier never has to reconstruct what we hashed.
+    """
+
+    __tablename__ = "provenance_entries"
+    __table_args__ = (UniqueConstraint("index", name="uq_provenance_index"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    index: Mapped[int] = mapped_column(Integer, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    initiating_artist_id: Mapped[int] = mapped_column(
+        ForeignKey("artists.id", ondelete="RESTRICT"), nullable=False
+    )
+    prev_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    entry_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    signature: Mapped[str] = mapped_column(String(256), nullable=False)
+    canonical_body: Mapped[str] = mapped_column(Text, nullable=False)
+
+    inputs: Mapped[list[ProvenanceEntryInput]] = relationship(
+        back_populates="entry",
+        cascade="all, delete-orphan",
+        order_by="ProvenanceEntryInput.position",
+    )
+
+
+class ProvenanceEntryInput(Base):
+    """One resolved input attached to a provenance entry.
+
+    Stored as structured rows (rather than only inside canonical_body) so the
+    settlement aggregation can do indexed joins. The canonical body remains the
+    source of truth for hash verification — these rows are derived from it.
+    """
+
+    __tablename__ = "provenance_entry_inputs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    entry_id: Mapped[int] = mapped_column(
+        ForeignKey("provenance_entries.id", ondelete="CASCADE"), nullable=False
+    )
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+    artist_id: Mapped[int] = mapped_column(
+        ForeignKey("artists.id", ondelete="RESTRICT"), nullable=False
+    )
+    rights_holder_id: Mapped[int] = mapped_column(
+        ForeignKey("rights_holders.id", ondelete="RESTRICT"), nullable=False
+    )
+    use_type: Mapped[UseType] = mapped_column(String(40), nullable=False)
+    consent_policy_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    weight: Mapped[float] = mapped_column(Float, nullable=False)
+
+    entry: Mapped[ProvenanceEntry] = relationship(back_populates="inputs")
