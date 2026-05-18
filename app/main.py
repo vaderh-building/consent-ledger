@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api import artists, consent_policies, rights_holders
 from app.db import init_db
 
 
@@ -28,6 +29,10 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+app.include_router(rights_holders.router)
+app.include_router(artists.router)
+app.include_router(consent_policies.router)
 
 
 @app.get("/", tags=["meta"])
