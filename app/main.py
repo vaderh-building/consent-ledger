@@ -10,7 +10,15 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.api import artists, authorization, consent_policies, provenance, rights_holders
+from app.api import (
+    artists,
+    authorization,
+    consent_policies,
+    consumption,
+    provenance,
+    rights_holders,
+    settlement,
+)
 from app.db import init_db
 from app.services.signing import ensure_keypair
 
@@ -37,6 +45,8 @@ app.include_router(artists.router)
 app.include_router(consent_policies.router)
 app.include_router(authorization.router)
 app.include_router(provenance.router)
+app.include_router(consumption.router)
+app.include_router(settlement.router)
 
 
 @app.get("/", tags=["meta"])

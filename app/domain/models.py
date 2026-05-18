@@ -160,3 +160,20 @@ class ProvenanceEntryInput(Base):
     weight: Mapped[float] = mapped_column(Float, nullable=False)
 
     entry: Mapped[ProvenanceEntry] = relationship(back_populates="inputs")
+
+
+class ConsumptionEvent(Base):
+    """One unit-scale consumption record attributable to a provenance entry.
+
+    'units' is intentionally abstract here (e.g. could stand in for streams or
+    licensed plays in a real system). 'period' is a free-form label settlement
+    queries filter on.
+    """
+
+    __tablename__ = "consumption_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    generation_index: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    units: Mapped[int] = mapped_column(Integer, nullable=False)
+    period: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
