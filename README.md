@@ -1,17 +1,30 @@
 # Consent–Attribution–Settlement Ledger
 
-A backend service that makes artist consent, attribution, and compensation
-mechanically enforceable at the moment of AI music generation — without a
-blockchain.
+**Start here.** Open [`index.html`](./index.html) in your browser. Double-clicking
+the file is enough, there is no server and no build. The page is a markets
+argument about why the per-stream royalty for AI-generated music collapses
+under the current logic, with a live chart and sliders so you can try to
+slider the collapse away and confirm you cannot. The chart is the first thing
+you see; the written argument is immediately below it.
+
+The service in this repository is the layer the page argues for. At the moment
+a generation is about to happen, the service asks three yes-or-no questions
+and commits the answer to an append-only signed log, so that a downstream
+auditor can verify what was decided without trusting the operator. The three
+questions are whether the source material is licensed, whether the source
+artist's consent policy on record allows this specific use of their work, and
+whether the resulting payment to the source is recorded in a form that the
+source artist can re-derive on their own machine. The signed binary output of
+those three checks is what the page calls the **stamp**. A stamped track is
+monetizable. An unstamped track is slop.
 
 Spotify's Artist-First AI Music lab has signed deals with major rights holders
-and made four public promises: license-first, artist opt-in over *if and how*
-their work is used, fair compensation + transparent credit, and artist–fan
+and made four public promises, license-first, artist opt-in over *if and how*
+their work is used, fair compensation and transparent credit, and artist–fan
 connection. The middle two only become real when there is infrastructure that
-enforces them — a system that refuses unauthorized inputs at the gate, records
-exactly what was used and under whose consent at the moment of generation, and
-lets every rights holder verify their statement themselves. This is that
-infrastructure, stripped to its smallest defensible form.
+enforces them at the moment of generation. This is that infrastructure,
+stripped to its smallest defensible form, paired with the markets argument
+that says what such a layer is actually paying for in a saturated-supply world.
 
 There is no audio ML in this project. The hard problem here is data systems.
 
@@ -51,11 +64,23 @@ uniquely good at) is not the missing ingredient. The signed, hash-chained
 append-only log plus inclusion proofs delivers tamper-evidence and
 independent verifiability without taking on the trade-offs.
 
+## The chart and the model
+
+The page at [`index.html`](./index.html) is the markets argument. Its
+two-line chart is computed live in the browser, and the same arithmetic
+lives as a documented Python reference at [`model/compensation.py`](./model/compensation.py)
+with its own test file at [`tests/test_model.py`](./tests/test_model.py).
+The load-bearing assertion in those tests is that even at the most
+source-favorable slider corner (slow growth, blend width of 1, and a 50
+percent source take under the current model), the red per-stream curve
+still falls below 25 percent of its starting value by month 12. The
+collapse is structural, not a function of pessimistic inputs.
+
 ## Run it
 
 ```bash
 make install          # one-time: venv + dependencies
-make test             # 25 tests, 95% coverage on app/domain + app/services
+make test             # 40 tests across the service + the chart's model
 make demo             # end-to-end live narrative on a local server
 ```
 
@@ -114,12 +139,15 @@ generated on first run and lives in `keys/` (gitignored). Nothing external.
 ## Repo layout
 
 ```
+index.html                self-contained markets argument + live chart
+model/                    Python reference for the chart's two-line model
+  compensation.py
 app/
   domain/      enums, ORM models, schemas, hash helpers
   services/    rights_holders, artists, consent_policies, authorization,
                provenance, consumption, settlement, statements, signing
   api/         one router file per resource
-tests/         pytest suite (25 cases, 95% coverage on domain+services)
+tests/         pytest suite (40 cases total — service + chart model)
 scripts/
   seed.py                 idempotent registry fixture loader
   demo.py                 full end-to-end live narrative
