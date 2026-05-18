@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Per-stream royalty meets infinite supply</title>
+
+<!--
+  Self-contained one-shot page. Double-click the file to open it; no server,
+  no build, no install. The arithmetic that drives the chart is reimplemented
+  below in JS so the page is portable, but the reference lives in
+  model/compensation.py in this repo. Tests in tests/test_model.py assert
+  the load-bearing property: even at the most source-favorable slider corner
+  the red curve drops below 25% of its starting value by month 12.
+-->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --muted: #5a5a5a;
+    --rule: #e3e3e3;
+    --bg: #ffffff;
+    --soft: #f7f7f7;
+    --red: #c62828;
+    --green: #2e7d32;
+    --accent: #1a1a1a;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--ink); }
+  body {
+    margin: 0;
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 24px 20px 96px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+  .sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0 0 16px;
+  }
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 360px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 12px 12px 8px;
+    background: var(--bg);
+  }
+  .controls {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: var(--soft);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 22px;
+  }
+  @media (min-width: 720px) {
+    .controls { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  .control label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .control .value {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .control input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid #c8c8c8;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .seg button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 7px 12px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    border-right: 1px solid #c8c8c8;
+  }
+  .seg button:last-child { border-right: 0; }
+  .seg button.active {
+    background: var(--ink);
+    color: #fff;
+  }
+  .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  section.prose {
+    margin-top: 36px;
+    max-width: 680px;
+  }
+  section.prose p {
+    margin: 0 0 18px;
+    color: var(--ink);
+  }
+  section.prose p.lede {
+    font-size: 17px;
+  }
+
+  section.prototype {
+    margin-top: 36px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    max-width: 680px;
+  }
+  section.prototype h2 {
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  pre.cmd {
+    background: #111;
+    color: #f4f4f4;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    margin: 8px 0 14px;
+    overflow-x: auto;
+  }
+  a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  a:hover { color: var(--red); }
+  .note {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+<main class="container">
+
+  <h1>Per-stream royalty meets infinite supply</h1>
+  <p class="sub">A markets argument, alongside a running prototype of the consent and attribution layer underneath it.</p>
+
+  <div class="chart-wrap">
+    <canvas id="chart"></canvas>
+  </div>
+
+  <div class="controls" id="controls">
+    <div class="control">
+      <label for="growthSeg">AI supply growth</label>
+      <div class="seg" id="growthSeg" role="group" aria-label="AI supply growth">
+        <button type="button" data-g="0.12" class="active">slow</button>
+        <button type="button" data-g="0.30">med</button>
+        <button type="button" data-g="0.55">explosive</button>
+      </div>
+    </div>
+    <div class="control">
+      <label for="blend">Blend width (sources per AI track)</label>
+      <div class="value"><span id="blendVal">4</span></div>
+      <input id="blend" type="range" min="1" max="20" step="1" value="4" />
+    </div>
+    <div class="control">
+      <label for="src">Source take % (current model)</label>
+      <div class="value"><span id="srcVal">20</span>%</div>
+      <input id="src" type="range" min="5" max="50" step="1" value="20" />
+    </div>
+    <div class="control">
+      <label for="pool">Monthly pool ($k)</label>
+      <div class="value">$<span id="poolVal">100</span>k</div>
+      <input id="pool" type="range" min="50" max="500" step="10" value="100" />
+    </div>
+  </div>
+
+  <section class="prose">
+    <p class="lede">Spotify's four AI principles, opt-in, fair compensation, transparent credit, and artist&ndash;fan connection, all rest on one piece of infrastructure that has to physically enforce them at the moment a track is generated, and the team is rightly building toward it. The question I kept returning to sits upstream of that build. Whatever that infrastructure enforces, it is enforcing a per-consumption royalty whose economic basis generative supply itself removes, because once the supply of style-faithful output approaches infinity, the scarce and therefore valuable thing is no longer the output but the verifiable claim that a given track is the licensed one, made under consent, with the source artist paid. I built a model that shows the month at which source-artist compensation collapses under the current logic, and a running prototype of the layer that issues and verifies that claim.</p>
+
+    <p>The prototype I have running in this same repository is exactly that checkpoint, and at the moment a generation is about to happen it asks three yes-or-no questions and commits the answer to an append-only signed log, so that a downstream auditor can verify what was decided without trusting the operator. The three questions are whether the source material is licensed, whether the source artist's consent policy on record allows this specific use of their work, and whether the resulting payment to the source is recorded in a form that the source artist can re-derive on their own machine. The signed binary output of those three checks, taken together, is what I have started calling, inside the engineering, the stamp.</p>
+
+    <p>A stamped track is monetizable in any venue that requires the stamp, because the consent decision, the licensing decision, and the credit decision are each defensible by an Ed25519 signature over a hash chain that any rights holder can replay alone, and the operator cannot quietly change history afterwards. An unstamped track, however technically accomplished, is slop, a thing that cannot pass an audit, cannot clear a brand-safety check at any platform that takes the four principles seriously, and cannot be defended in court if a source artist comes forward. The scarce and therefore valuable asset in a saturated-supply world is admission to the stamped tier, not the output, because the output, by hypothesis, has become unlimited.</p>
+
+    <p>The reason the enforcement engineers are unlikely to surface this on their own, and I want to say this carefully because the work they are doing is the right work, is that they will be measured on whether their checkpoint correctly enforces opt-in and correctly records payment, both of which it does, and the question of whether the per-consumption royalty that the checkpoint enforces remains economically meaningful at scale belongs structurally to a different workstream. Sitting alongside that team and putting in front of leadership a piece of paper that shows, with sliders the reader can move themselves, the month at which source-artist compensation collapses under the current logic, is what I would expect a markets-oriented hire to be doing in their first quarter, and it is what this page is.</p>
+
+    <p>The load-bearing assumption in this whole argument, and I want to be the one to flag it, is that downstream monetization comes to require the stamp rather than treating it as one of several optional rails, and the most plausible mechanism by which that requirement arrives is liability, specifically the combination of legal exposure for unlicensed training-data inputs and brand-safety exposure for platforms that knowingly distribute unstamped material at scale. If that liability story does not arrive the stamp is a virtue signal and the chart's red curve is what happens. If it does arrive, even partially, the stamp is the new floor, and the question for Spotify in particular is whether they would rather be the issuer of that stamp, the layer that signs it and earns the seigniorage from issuing it, or whether they would rather discover after the fact that someone else already is.</p>
+  </section>
+
+  <section class="prototype">
+    <h2>The prototype</h2>
+    <p>The service in this repository is the stamp issuer. The registry, the gate, the signed hash-chained log, the settlement attribution, and the rights-holder statement that re-verifies offline are all here, behind eight HTTP endpoints, in under twelve hundred lines of typed Python with a 95 percent test coverage gate on the domain and services layers. One command resets local state, spawns the server, and walks the entire loop end to end on your machine, including a live tamper attempt that the verifier localizes back to the exact entry that was mutated.</p>
+    <pre class="cmd">make demo</pre>
+    <p>What lives in this repository is the running form of the layer this page argues for, not a description of it, and it would take an afternoon to bring up in front of someone with appropriate questions. The full design and the deliberate non-blockchain argument live in <a href="DESIGN.md">DESIGN.md</a>, and the prototype itself starts in <a href="app/main.py">app/main.py</a>.</p>
+    <p class="note">The reference model that drives the chart lives in <a href="model/compensation.py">model/compensation.py</a>, and the arithmetic on this page is the same arithmetic reimplemented in JS so the file is portable. The Python tests in <a href="tests/test_model.py">tests/test_model.py</a> assert that the red curve drops below 25 percent of its starting value even at the most source-favorable slider corner, which is the load-bearing property of the chart.</p>
+  </section>
+
+</main>
+
+<script>
+// ---- model (mirror of model/compensation.py — keep these in sync) ----
+const GREEN_FLOOR = 0.80;
+const GREEN_EROSION = 0.30;
+const MONTHS = 12;
+
+function redSeries(growth, blend, sourcePct, pool, months) {
+  const out = [];
+  for (let t = 0; t < months; t++) {
+    const N = Math.pow(1 + growth, t);
+    const organic = 1 / N;
+    const citationShare = (1 - organic) * sourcePct / blend;
+    const revenueShare = organic + citationShare;
+    const perUnit = organic;
+    out.push(pool * revenueShare * perUnit);
+  }
+  return out;
+}
+
+function greenSeries(pool, months) {
+  const out = [];
+  for (let t = 0; t < months; t++) {
+    const factor = GREEN_FLOOR + (1 - GREEN_FLOOR) * Math.exp(-GREEN_EROSION * t);
+    out.push(pool * factor);
+  }
+  return out;
+}
+
+// ---- UI state ----
+const state = {
+  growth: 0.12,            // slow by default so the page loads on the
+                           // source-favorable side and the collapse is
+                           // visibly NOT a function of pessimistic inputs.
+  blend: 4,
+  sourcePct: 0.20,
+  pool: 100,
+};
+
+const labels = Array.from({length: MONTHS}, (_, i) => `Month ${i}`);
+
+const ctx = document.getElementById('chart').getContext('2d');
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      {
+        label: 'Current model — price the infinite output',
+        data: redSeries(state.growth, state.blend, state.sourcePct, state.pool, MONTHS),
+        borderColor: '#c62828',
+        backgroundColor: '#c62828',
+        borderDash: [7, 5],
+        borderWidth: 2,
+        pointRadius: 2,
+        tension: 0.25,
+        fill: false,
+      },
+      {
+        label: 'Inverted model — price the scarce stamp',
+        data: greenSeries(state.pool, MONTHS),
+        borderColor: '#2e7d32',
+        backgroundColor: '#2e7d32',
+        borderWidth: 2,
+        pointRadius: 2,
+        tension: 0.25,
+        fill: false,
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 280 },
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        position: 'top',
+        align: 'start',
+        labels: { boxWidth: 22, boxHeight: 2, font: { size: 12 } },
+      },
+      tooltip: {
+        callbacks: {
+          label: (item) => `${item.dataset.label.replace(/—.*/, '').trim()}: $${item.parsed.y.toFixed(1)}k`,
+        },
+      },
+    },
+    scales: {
+      x: { grid: { color: '#f0f0f0' } },
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Artist A take-home ($k/month)', font: { size: 12 } },
+        grid: { color: '#f0f0f0' },
+      },
+    },
+  },
+});
+
+function recompute() {
+  chart.data.datasets[0].data = redSeries(
+    state.growth, state.blend, state.sourcePct, state.pool, MONTHS
+  );
+  chart.data.datasets[1].data = greenSeries(state.pool, MONTHS);
+  chart.update();
+}
+
+// segmented control for AI supply growth
+document.querySelectorAll('#growthSeg button').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#growthSeg button').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.growth = parseFloat(btn.dataset.g);
+    recompute();
+  });
+});
+
+const blendEl = document.getElementById('blend');
+const blendVal = document.getElementById('blendVal');
+blendEl.addEventListener('input', () => {
+  state.blend = parseInt(blendEl.value, 10);
+  blendVal.textContent = state.blend;
+  recompute();
+});
+
+const srcEl = document.getElementById('src');
+const srcVal = document.getElementById('srcVal');
+srcEl.addEventListener('input', () => {
+  state.sourcePct = parseInt(srcEl.value, 10) / 100;
+  srcVal.textContent = srcEl.value;
+  recompute();
+});
+
+const poolEl = document.getElementById('pool');
+const poolVal = document.getElementById('poolVal');
+poolEl.addEventListener('input', () => {
+  state.pool = parseInt(poolEl.value, 10);
+  poolVal.textContent = state.pool;
+  recompute();
+});
+</script>
+</body>
+</html>
