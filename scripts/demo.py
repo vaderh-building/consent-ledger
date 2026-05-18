@@ -246,7 +246,7 @@ def main() -> int:
             section("DONE")
             line("DENY enforced, PARTIAL recorded only allowed inputs, ALLOW chain built,")
             line("settlement attributed via provenance, statement re-verified offline,")
-            line("post-hoc tamper detected and localized — all without a blockchain.")
+            line("post-hoc tamper detected and localized to the exact entry index.")
 
     finally:
         if server.poll() is None:

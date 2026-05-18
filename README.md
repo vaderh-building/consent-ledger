@@ -52,17 +52,8 @@ There is no audio ML in this project. The hard problem here is data systems.
   signature, and the verbatim canonical JSON we hashed, plus the service
   public-key PEM. `scripts/verify_statement.py` re-checks all of it offline.
 
-## Why not a blockchain
-
-The full argument is in [DESIGN.md](./DESIGN.md#why-not-a-blockchain). Short
-version: the hard problem here is the *oracle problem* — deciding which
-copyrighted inputs fed a generation under which consent version happens
-off-chain, and a chain can only immutably record the output of that decision.
-The counterparties are ~5 named, contractually-bound institutions, so
-trustlessness among anonymous adversaries (the property a public chain is
-uniquely good at) is not the missing ingredient. The signed, hash-chained
-append-only log plus inclusion proofs delivers tamper-evidence and
-independent verifiability without taking on the trade-offs.
+Integrity comes from a signed, append-only hash-chained log; every statement
+carries an inclusion proof that any rights holder can verify offline.
 
 ## The chart and the model
 
@@ -154,6 +145,6 @@ scripts/
   verify_statement.py     offline re-verifier for a saved statement JSON
   export_openapi.py       dump openapi.json to disk
 openapi.json              exported OpenAPI spec
-DESIGN.md                 architecture + "why not a blockchain"
+DESIGN.md                 architecture + integrity and verifiability
 NARRATIVE.md              one-page first-person framing
 ```

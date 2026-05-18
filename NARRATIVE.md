@@ -21,21 +21,6 @@ the rights holder doesn't have to trust the operator, and the operator
 cannot quietly change history. The demo script walks the entire loop,
 including a live tamper-and-detect, in about ten seconds.
 
-The hardest decision in the design was not using a blockchain, which is
-covered in detail in `DESIGN.md`. The short form: the difficult truth here
-is the oracle problem — deciding which inputs fed a generation under which
-consent version is an off-chain decision that a chain can only immutably
-record, not improve. The counterparties are five named, contractually-bound
-institutions with deliberately opaque deal economics, so trustlessness among
-anonymous adversaries (the one property a public chain is uniquely good at)
-is not the missing ingredient. And Spotify acquired Mediachain in 2017 and
-the blockchain form did not survive — pitching this on a chain to this
-specific employer is a credibility risk. What is actually needed is
-tamper-evident, independently-verifiable settlement, and a signed
-hash-chained append-only log delivers that correctly in two-digit lines of
-cryptography. Making that choice well — and being able to defend it — felt
-more useful to show than the alternative.
-
 The JD describes the role as building "APIs that power AI creation flows,
 content consumption, and reporting." This project is exactly those three
 endpoints. `POST /authorize` and `POST /generations` are the creation-flow

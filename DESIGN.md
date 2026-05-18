@@ -172,87 +172,48 @@ honest.
 
 ---
 
-## Why not a blockchain
+## Integrity and verifiability
 
-The first instinct on encountering "tamper-evident music rights attribution"
-is to reach for a blockchain. Don't. The decision was deliberate and is the
-intellectual core of this project.
+The integrity goal of this service is **verifiable settlement**. The harder
+upstream question — *which* copyrighted inputs actually fed a given
+generation, and *under which version of which artist's consent policy* that
+use was permitted — is a data-truth question resolved before the integrity
+layer ever runs. It is resolved by the pipeline that hands inputs to the
+gate, and by the append-only consent registry the gate reads. Once those
+facts are established and the gate has decided, the job of the integrity
+layer is to make the resulting settlement provably correct after the fact:
+that the generation was recorded exactly as decided, that no entry has been
+changed since, and that the dollar amount any rights holder is owed can be
+re-derived by that rights holder, alone, on their own machine.
 
-### (a) The hard problem is the oracle problem, not the ledger problem
+Two properties carry that load.
 
-What needs to be true here is: *the inputs cited on this generation are
-exactly the inputs that fed the model, and the consent policy at the moment
-of generation actually allowed those uses.* That truth is established
-off-chain — by the gate, the model, the operator's pipeline, and the
-authorization decision against the registry. A blockchain can only commit,
-immutably, to *whatever* facts it is handed. It does not improve the
-reliability of the upstream decision; it merely makes a bad decision
-permanent. Solving "did the model actually use this stem?" is an oracle
-problem, and oracles are where blockchain systems consistently fail. Putting
-the same answer on a chain doesn't make it more true.
+**Tamper-evidence.** Every accepted generation appends one row to a signed,
+append-only hash-chained log. Each row commits to the previous row via
+`entry_hash = sha256(prev_hash || canonical_json(body))`, and `entry_hash`
+itself is signed under the service's Ed25519 key. Mutating a stored input
+row trips the structured-rows-vs-canonical-body cross-check. Mutating the
+canonical body trips the `entry_hash` recomputation. Mutating the signature
+trips Ed25519 verification. Mutating `prev_hash` breaks the replay's
+expected-chain invariant. `GET /provenance/verify` walks the log top to
+bottom and pinpoints the first tampered index, with a specific message
+identifying which of the four invariants failed. All four failure modes
+are exercised in `tests/test_tamper_evidence.py`.
 
-### (b) The economics are deliberately opaque
+**Independent verifiability.** A rights-holder statement carries, per
+citation, the verbatim canonical body we hashed, the `prev_hash` it linked
+to, the `entry_hash` itself, the Ed25519 signature, and the service public
+key in PEM form. The recipient recomputes `entry_hash` from `prev_hash`
+and the canonical body, verifies the signature against the embedded public
+key, parses the canonical body to recover the recorded inputs and weights,
+and re-derives the dollar amount using only the formula parameters that
+travel with the statement. `scripts/verify_statement.py` is the canonical
+client-side implementation of that procedure, and exits non-zero if any
+check fails. The recipient never has to contact the service to know their
+statement is honest.
 
-The rights-holder counterparties for an Artist-First lab are major labels,
-major publishers, and indie aggregators. These institutions negotiate terms
-that are non-public on purpose. Per-deal advances, per-use rates, MFN
-clauses, cross-catalog discounts, and side letters are competitive
-information; they are not going on a public ledger and they are not going on
-a "private" L2/L3 with an indexed history either. The technology choice
-contradicts the economics. Any blockchain pitch here forces a conversation
-about transparency they actively do not want, which kills the deal before the
-technical merits get examined.
-
-### (c) Trustlessness among anonymous adversaries is not the property needed
-
-The participants are roughly five named, contractually-bound institutions
-that have already signed agreements with each other. They are not anonymous,
-they cannot exit, and they can sue. The thing a public chain is *uniquely*
-good at — letting anonymous parties who can't sue each other still agree on
-shared state — is not the missing ingredient. What's missing is something
-much smaller: a way for those named, identifiable counterparties to verify
-the operator's accounting against the operator's stored evidence. A signed
-hash-chained log plus inclusion proofs delivers exactly that, with two-digit
-lines of cryptography and one Python file you can read end-to-end.
-
-### (d) Spotify acquired Mediachain in 2017, and the chain form did not survive
-
-In 2017, Spotify acquired Mediachain Labs — a startup explicitly building
-blockchain-based music attribution. The blockchain form of that work did not
-become a Spotify product. Pitching "blockchain for rights attribution" to
-this specific employer is therefore not a neutral technology choice; it is
-proposing to redo something the institution already tried and stepped away
-from. That's a credibility problem before it's a technical one.
-
-### What we actually need, and how this delivers it
-
-The properties required are:
-
-- **Tamper-evidence.** Mutating any stored entry must be detectable after
-  the fact.
-- **Independent verifiability.** Every rights holder must be able to confirm
-  the operator's numbers without trusting the operator.
-- **Append-only history.** Older states (especially old consent policy
-  versions) must remain queryable forever.
-- **Cryptographic non-repudiation.** A statement issued by the service must
-  be attributable to it.
-
-The signed, hash-chained log delivers all four:
-
-- `entry_hash = sha256(prev_hash || canonical_json(body))` propagates any
-  change forward — the chain detects mutation deterministically.
-- Statements carry the verbatim canonical body plus the Ed25519 signature
-  and the public key PEM, so verification happens entirely on the
-  recipient's machine.
-- Both the policy table and the provenance log are strictly append-only
-  by service contract; the only DDL paths are migrations.
-- Signatures are over `entry_hash` with a service-controlled key. The
-  operator cannot deny having issued an entry that verifies under their
-  public key.
-
-What we *give up* by not using a chain: nothing the use case actually needs.
-We do not need anonymous consensus, byzantine-fault tolerance among
-adversarial validators, gas-priced ordering, or trustless settlement. We do
-need precisely what's here.
-
-This is the right boring answer.
+Together these two properties are what makes the lab's third principle,
+fair compensation and transparent credit, mechanically defensible. Every
+amount in the report has an inclusion proof. Every inclusion proof
+verifies offline. Every change to the past is detectable, and is
+localized to a specific entry index. That is what the service is for.
