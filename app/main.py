@@ -18,6 +18,7 @@ from app.api import (
     provenance,
     rights_holders,
     settlement,
+    statements,
 )
 from app.db import init_db
 from app.services.signing import ensure_keypair
@@ -47,6 +48,7 @@ app.include_router(authorization.router)
 app.include_router(provenance.router)
 app.include_router(consumption.router)
 app.include_router(settlement.router)
+app.include_router(statements.router)
 
 
 @app.get("/", tags=["meta"])
