@@ -163,8 +163,8 @@ def main() -> int:
             # so the requested 0.9 should have been clamped on the way in.
             joaquin_entry = client.get("/provenance/head").json()
             line(
-                f"  note: joaquin's VOICE_CLONING request (0.9) was capped by his "
-                f"consent policy (max_weight=0.3) before being recorded."
+                "  note: joaquin's VOICE_CLONING request (0.9) was capped by his "
+                "consent policy (max_weight=0.3) before being recorded."
             )
             line(f"  chain head now: {joaquin_entry['head_hash'][:16]}…  entry_count={joaquin_entry['entry_count']}")
 

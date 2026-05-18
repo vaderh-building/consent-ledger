@@ -1,0 +1,1498 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Consent\u2013Attribution\u2013Settlement Ledger",
+    "description": "Tamper-evident infrastructure that makes artist consent, attribution, and compensation mechanically enforceable at the moment of AI generation.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/rights-holders": {
+      "get": {
+        "tags": [
+          "rights-holders"
+        ],
+        "summary": "List All",
+        "operationId": "list_all_rights_holders_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RightsHolderOut"
+                  },
+                  "type": "array",
+                  "title": "Response List All Rights Holders Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "rights-holders"
+        ],
+        "summary": "Create",
+        "operationId": "create_rights_holders_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RightsHolderCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RightsHolderOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rights-holders/{rights_holder_id}": {
+      "get": {
+        "tags": [
+          "rights-holders"
+        ],
+        "summary": "Get One",
+        "operationId": "get_one_rights_holders__rights_holder_id__get",
+        "parameters": [
+          {
+            "name": "rights_holder_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Rights Holder Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RightsHolderOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/artists": {
+      "get": {
+        "tags": [
+          "artists"
+        ],
+        "summary": "List All",
+        "operationId": "list_all_artists_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ArtistOut"
+                  },
+                  "type": "array",
+                  "title": "Response List All Artists Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "artists"
+        ],
+        "summary": "Create",
+        "operationId": "create_artists_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtistCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtistOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/artists/{artist_id}": {
+      "get": {
+        "tags": [
+          "artists"
+        ],
+        "summary": "Get One",
+        "operationId": "get_one_artists__artist_id__get",
+        "parameters": [
+          {
+            "name": "artist_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Artist Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtistOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/artists/{artist_id}/consent-policy": {
+      "get": {
+        "tags": [
+          "artists"
+        ],
+        "summary": "Get Consent Policy",
+        "operationId": "get_consent_policy_artists__artist_id__consent_policy_get",
+        "parameters": [
+          {
+            "name": "artist_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Artist Id"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentPolicyOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/consent-policies": {
+      "post": {
+        "tags": [
+          "consent-policies"
+        ],
+        "summary": "Create",
+        "operationId": "create_consent_policies_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentPolicyCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentPolicyOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/authorize": {
+      "post": {
+        "tags": [
+          "authorization"
+        ],
+        "summary": "Post Authorize",
+        "operationId": "post_authorize_authorize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorizationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/generations": {
+      "post": {
+        "tags": [
+          "provenance"
+        ],
+        "summary": "Post Generation",
+        "operationId": "post_generation_generations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/provenance/head": {
+      "get": {
+        "tags": [
+          "provenance"
+        ],
+        "summary": "Get Head",
+        "operationId": "get_head_provenance_head_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvenanceHead"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/provenance/verify": {
+      "get": {
+        "tags": [
+          "provenance"
+        ],
+        "summary": "Get Verify",
+        "operationId": "get_verify_provenance_verify_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/consumption-events": {
+      "post": {
+        "tags": [
+          "consumption"
+        ],
+        "summary": "Post Event",
+        "operationId": "post_event_consumption_events_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsumptionEventCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsumptionEventOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settlement/report": {
+      "get": {
+        "tags": [
+          "settlement"
+        ],
+        "summary": "Get Report",
+        "operationId": "get_report_settlement_report_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "title": "Period"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementReport"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rights-holders/{rights_holder_id}/statement": {
+      "get": {
+        "tags": [
+          "statements"
+        ],
+        "summary": "Get Statement",
+        "operationId": "get_statement_rights_holders__rights_holder_id__statement_get",
+        "parameters": [
+          {
+            "name": "rights_holder_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Rights Holder Id"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "title": "Period"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RightsHolderStatement"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Root  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ArtistCreate": {
+        "properties": {
+          "rights_holder_id": {
+            "type": "integer",
+            "title": "Rights Holder Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rights_holder_id",
+          "name"
+        ],
+        "title": "ArtistCreate"
+      },
+      "ArtistOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "rights_holder_id": {
+            "type": "integer",
+            "title": "Rights Holder Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "rights_holder_id",
+          "name",
+          "created_at"
+        ],
+        "title": "ArtistOut"
+      },
+      "ArtistPayout": {
+        "properties": {
+          "artist_id": {
+            "type": "integer",
+            "title": "Artist Id"
+          },
+          "artist_name": {
+            "type": "string",
+            "title": "Artist Name"
+          },
+          "rights_holder_id": {
+            "type": "integer",
+            "title": "Rights Holder Id"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "artist_id",
+          "artist_name",
+          "rights_holder_id",
+          "amount"
+        ],
+        "title": "ArtistPayout"
+      },
+      "AuthorizationDecision": {
+        "type": "string",
+        "enum": [
+          "ALLOW",
+          "PARTIAL",
+          "DENY"
+        ],
+        "title": "AuthorizationDecision"
+      },
+      "AuthorizationRequest": {
+        "properties": {
+          "initiating_artist_id": {
+            "type": "integer",
+            "title": "Initiating Artist Id"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ProposedInput"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Inputs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "initiating_artist_id",
+          "inputs"
+        ],
+        "title": "AuthorizationRequest"
+      },
+      "AuthorizationResponse": {
+        "properties": {
+          "decision": {
+            "$ref": "#/components/schemas/AuthorizationDecision"
+          },
+          "initiating_artist_id": {
+            "type": "integer",
+            "title": "Initiating Artist Id"
+          },
+          "resolved_inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ResolvedInput"
+            },
+            "type": "array",
+            "title": "Resolved Inputs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision",
+          "initiating_artist_id",
+          "resolved_inputs"
+        ],
+        "title": "AuthorizationResponse"
+      },
+      "ConsentPolicyCreate": {
+        "properties": {
+          "artist_id": {
+            "type": "integer",
+            "title": "Artist Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentPolicyEntryIn"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "artist_id",
+          "entries"
+        ],
+        "title": "ConsentPolicyCreate"
+      },
+      "ConsentPolicyEntryIn": {
+        "properties": {
+          "use_type": {
+            "$ref": "#/components/schemas/UseType"
+          },
+          "allowed": {
+            "type": "boolean",
+            "title": "Allowed"
+          },
+          "max_weight": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Weight"
+          }
+        },
+        "type": "object",
+        "required": [
+          "use_type",
+          "allowed"
+        ],
+        "title": "ConsentPolicyEntryIn"
+      },
+      "ConsentPolicyEntryOut": {
+        "properties": {
+          "use_type": {
+            "$ref": "#/components/schemas/UseType"
+          },
+          "allowed": {
+            "type": "boolean",
+            "title": "Allowed"
+          },
+          "max_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Weight"
+          }
+        },
+        "type": "object",
+        "required": [
+          "use_type",
+          "allowed",
+          "max_weight"
+        ],
+        "title": "ConsentPolicyEntryOut"
+      },
+      "ConsentPolicyOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "artist_id": {
+            "type": "integer",
+            "title": "Artist Id"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentPolicyEntryOut"
+            },
+            "type": "array",
+            "title": "Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "artist_id",
+          "version",
+          "notes",
+          "created_at",
+          "entries"
+        ],
+        "title": "ConsentPolicyOut"
+      },
+      "ConsumptionEventCreate": {
+        "properties": {
+          "generation_index": {
+            "type": "integer",
+            "title": "Generation Index"
+          },
+          "units": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Units"
+          },
+          "period": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Period"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generation_index",
+          "units",
+          "period"
+        ],
+        "title": "ConsumptionEventCreate"
+      },
+      "ConsumptionEventOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "generation_index": {
+            "type": "integer",
+            "title": "Generation Index"
+          },
+          "units": {
+            "type": "integer",
+            "title": "Units"
+          },
+          "period": {
+            "type": "string",
+            "title": "Period"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "generation_index",
+          "units",
+          "period",
+          "created_at"
+        ],
+        "title": "ConsumptionEventOut"
+      },
+      "GenerationCitation": {
+        "properties": {
+          "generation_index": {
+            "type": "integer",
+            "title": "Generation Index"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "initiating_artist_id": {
+            "type": "integer",
+            "title": "Initiating Artist Id"
+          },
+          "consent_policy_version": {
+            "type": "integer",
+            "title": "Consent Policy Version"
+          },
+          "use_type": {
+            "$ref": "#/components/schemas/UseType"
+          },
+          "weight": {
+            "type": "number",
+            "title": "Weight"
+          },
+          "units_consumed": {
+            "type": "integer",
+            "title": "Units Consumed"
+          },
+          "rights_holder_share_of_generation": {
+            "type": "number",
+            "title": "Rights Holder Share Of Generation"
+          },
+          "amount_for_this_rights_holder": {
+            "type": "number",
+            "title": "Amount For This Rights Holder"
+          },
+          "prev_hash": {
+            "type": "string",
+            "title": "Prev Hash"
+          },
+          "entry_hash": {
+            "type": "string",
+            "title": "Entry Hash"
+          },
+          "signature": {
+            "type": "string",
+            "title": "Signature"
+          },
+          "canonical_entry_body": {
+            "type": "string",
+            "title": "Canonical Entry Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generation_index",
+          "timestamp",
+          "initiating_artist_id",
+          "consent_policy_version",
+          "use_type",
+          "weight",
+          "units_consumed",
+          "rights_holder_share_of_generation",
+          "amount_for_this_rights_holder",
+          "prev_hash",
+          "entry_hash",
+          "signature",
+          "canonical_entry_body"
+        ],
+        "title": "GenerationCitation"
+      },
+      "GenerationCreate": {
+        "properties": {
+          "initiating_artist_id": {
+            "type": "integer",
+            "title": "Initiating Artist Id"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ProposedInput"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Inputs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "initiating_artist_id",
+          "inputs"
+        ],
+        "title": "GenerationCreate"
+      },
+      "GenerationOut": {
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "initiating_artist_id": {
+            "type": "integer",
+            "title": "Initiating Artist Id"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/RecordedInput"
+            },
+            "type": "array",
+            "title": "Inputs"
+          },
+          "prev_hash": {
+            "type": "string",
+            "title": "Prev Hash"
+          },
+          "entry_hash": {
+            "type": "string",
+            "title": "Entry Hash"
+          },
+          "signature": {
+            "type": "string",
+            "title": "Signature"
+          }
+        },
+        "type": "object",
+        "required": [
+          "index",
+          "timestamp",
+          "initiating_artist_id",
+          "inputs",
+          "prev_hash",
+          "entry_hash",
+          "signature"
+        ],
+        "title": "GenerationOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ProposedInput": {
+        "properties": {
+          "artist_id": {
+            "type": "integer",
+            "title": "Artist Id"
+          },
+          "use_type": {
+            "$ref": "#/components/schemas/UseType"
+          },
+          "requested_weight": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Requested Weight"
+          }
+        },
+        "type": "object",
+        "required": [
+          "artist_id",
+          "use_type",
+          "requested_weight"
+        ],
+        "title": "ProposedInput"
+      },
+      "ProvenanceHead": {
+        "properties": {
+          "head_hash": {
+            "type": "string",
+            "title": "Head Hash"
+          },
+          "entry_count": {
+            "type": "integer",
+            "title": "Entry Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "head_hash",
+          "entry_count"
+        ],
+        "title": "ProvenanceHead"
+      },
+      "RecordedInput": {
+        "properties": {
+          "artist_id": {
+            "type": "integer",
+            "title": "Artist Id"
+          },
+          "rights_holder_id": {
+            "type": "integer",
+            "title": "Rights Holder Id"
+          },
+          "use_type": {
+            "$ref": "#/components/schemas/UseType"
+          },
+          "consent_policy_version": {
+            "type": "integer",
+            "title": "Consent Policy Version"
+          },
+          "weight": {
+            "type": "number",
+            "title": "Weight"
+          }
+        },
+        "type": "object",
+        "required": [
+          "artist_id",
+          "rights_holder_id",
+          "use_type",
+          "consent_policy_version",
+          "weight"
+        ],
+        "title": "RecordedInput"
+      },
+      "ResolvedInput": {
+        "properties": {
+          "artist_id": {
+            "type": "integer",
+            "title": "Artist Id"
+          },
+          "rights_holder_id": {
+            "type": "integer",
+            "title": "Rights Holder Id"
+          },
+          "use_type": {
+            "$ref": "#/components/schemas/UseType"
+          },
+          "requested_weight": {
+            "type": "number",
+            "title": "Requested Weight"
+          },
+          "granted_weight": {
+            "type": "number",
+            "title": "Granted Weight"
+          },
+          "allowed": {
+            "type": "boolean",
+            "title": "Allowed"
+          },
+          "consent_policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consent Policy Version"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "artist_id",
+          "rights_holder_id",
+          "use_type",
+          "requested_weight",
+          "granted_weight",
+          "allowed",
+          "consent_policy_version",
+          "reason"
+        ],
+        "title": "ResolvedInput"
+      },
+      "RightsHolderCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "RightsHolderCreate"
+      },
+      "RightsHolderOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "created_at"
+        ],
+        "title": "RightsHolderOut"
+      },
+      "RightsHolderPayout": {
+        "properties": {
+          "rights_holder_id": {
+            "type": "integer",
+            "title": "Rights Holder Id"
+          },
+          "rights_holder_name": {
+            "type": "string",
+            "title": "Rights Holder Name"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rights_holder_id",
+          "rights_holder_name",
+          "amount"
+        ],
+        "title": "RightsHolderPayout"
+      },
+      "RightsHolderStatement": {
+        "properties": {
+          "rights_holder_id": {
+            "type": "integer",
+            "title": "Rights Holder Id"
+          },
+          "rights_holder_name": {
+            "type": "string",
+            "title": "Rights Holder Name"
+          },
+          "period": {
+            "type": "string",
+            "title": "Period"
+          },
+          "total_amount": {
+            "type": "number",
+            "title": "Total Amount"
+          },
+          "pool_per_unit": {
+            "type": "number",
+            "title": "Pool Per Unit"
+          },
+          "initiating_artist_share": {
+            "type": "number",
+            "title": "Initiating Artist Share"
+          },
+          "service_public_key_pem": {
+            "type": "string",
+            "title": "Service Public Key Pem"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/GenerationCitation"
+            },
+            "type": "array",
+            "title": "Citations"
+          },
+          "head_hash": {
+            "type": "string",
+            "title": "Head Hash"
+          },
+          "entry_count": {
+            "type": "integer",
+            "title": "Entry Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rights_holder_id",
+          "rights_holder_name",
+          "period",
+          "total_amount",
+          "pool_per_unit",
+          "initiating_artist_share",
+          "service_public_key_pem",
+          "citations",
+          "head_hash",
+          "entry_count"
+        ],
+        "title": "RightsHolderStatement"
+      },
+      "SettlementReport": {
+        "properties": {
+          "period": {
+            "type": "string",
+            "title": "Period"
+          },
+          "pool_per_unit": {
+            "type": "number",
+            "title": "Pool Per Unit"
+          },
+          "initiating_artist_share": {
+            "type": "number",
+            "title": "Initiating Artist Share"
+          },
+          "total_units": {
+            "type": "integer",
+            "title": "Total Units"
+          },
+          "total_pool": {
+            "type": "number",
+            "title": "Total Pool"
+          },
+          "per_rights_holder": {
+            "items": {
+              "$ref": "#/components/schemas/RightsHolderPayout"
+            },
+            "type": "array",
+            "title": "Per Rights Holder"
+          },
+          "per_initiating_artist": {
+            "items": {
+              "$ref": "#/components/schemas/ArtistPayout"
+            },
+            "type": "array",
+            "title": "Per Initiating Artist"
+          },
+          "formula": {
+            "type": "string",
+            "title": "Formula"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period",
+          "pool_per_unit",
+          "initiating_artist_share",
+          "total_units",
+          "total_pool",
+          "per_rights_holder",
+          "per_initiating_artist",
+          "formula"
+        ],
+        "title": "SettlementReport"
+      },
+      "UseType": {
+        "type": "string",
+        "enum": [
+          "STYLE_CONDITIONING",
+          "VOICE_CLONING",
+          "STEM_USE",
+          "FULL_TRACK_REFERENCE",
+          "LYRICAL_REFERENCE"
+        ],
+        "title": "UseType"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VerifyResponse": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "entry_count": {
+            "type": "integer",
+            "title": "Entry Count"
+          },
+          "first_tampered_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Tampered Index"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "entry_count"
+        ],
+        "title": "VerifyResponse"
+      }
+    }
+  }
+}

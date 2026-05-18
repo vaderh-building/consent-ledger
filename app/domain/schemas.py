@@ -13,7 +13,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.domain.enums import AuthorizationDecision, UseType
 
-
 # ---------- Rights holders / artists ----------
 
 
